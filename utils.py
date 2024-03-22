@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 import itertools
+import pandas as pd
+
 
 # Function to generate timetable for each day
 def generate_daily_timetable(date, employees, vacation_dates):
@@ -39,3 +41,23 @@ def generate_timetable(days, employees, employee_vacations):
         employee_timetables[current_date] = generate_daily_timetable(current_date, employees, employee_vacations)
         current_date += timedelta(days=1)
     return employee_timetables
+
+
+def create_timetable_dataframe(employee_timetables, folder_data=None):
+    # Make a unique dataframe for all employees knowing when each person works
+    df = pd.DataFrame(columns=['Date', 'Employee', 'Shift'])
+    for date, timetable in employee_timetables.items():
+        df = pd.concat([df, pd.DataFrame(timetable, columns=['Date', 'Employee', 'Shift'])])
+
+    # Make another dataframe with column being Date and rows being the shift [Morning, Afternoon] and values the Employee names
+    timetable_data = df.pivot(index='Shift', columns='Date', values='Employee') 
+    # Make rows Morning, Afternoon in that order
+    timetable_data = timetable_data.reindex(['Morning', 'Afternoon'])
+    # Modify the column names to be the date in the format 'DD/MM/YYYY'
+    timetable_data.columns = [date.strftime('%d/%m/%Y') for date in timetable_data.columns]
+
+    if folder_data:
+        # Save timetable to Excel taking into account the multicolumn. Save it to a sheet called 'Timetable' in the file 'employee_data.xlsx'
+        with pd.ExcelWriter(f'{folder_data}/employee_data.xlsx', mode='a') as writer:
+            timetable_data.to_excel(writer, sheet_name='Timetable', index=True)
+    return timetable_data

@@ -1,6 +1,8 @@
 import pandas as pd
-from datetime import datetime, timedelta
-from utils import generate_timetable
+import streamlit as st
+
+from utils import generate_timetable, create_timetable_dataframe
+
 
 # Load data from Excel
 folder_data = 'data'
@@ -33,25 +35,9 @@ for date, timetable in employee_timetables.items():
         print(f"Shift: {entry[2]}, Employee: {entry[1]}")
 
 
-# Make a unique dataframe for all employees knowing when each person works
-df = pd.DataFrame(columns=['Date', 'Employee', 'Shift'])
-for date, timetable in employee_timetables.items():
-    df = pd.concat([df, pd.DataFrame(timetable, columns=['Date', 'Employee', 'Shift'])])
-print(df)
+timetable_data = create_timetable_dataframe(employee_timetables, folder_data=folder_data)
+    
 
-
-# Make another dataframe with column being Date and rows being the shift [Morning, Afternoon] and values the Employee names
-df2 = df.pivot(index='Shift', columns='Date', values='Employee') 
-# Make rows Morning, Afternoon in that order
-df2 = df2.reindex(['Morning', 'Afternoon'])
-# Modify the column names to be the date in the format 'DD/MM/YYYY'
-df2.columns = [date.strftime('%d/%m/%Y') for date in df2.columns]
-print(df2)
-
-# Save timetable to Excel taking into account the multicolumn. Save it to a sheet called 'Timetable' in the file 'employee_data.xlsx'
-with pd.ExcelWriter(f'{folder_data}/employee_data.xlsx', mode='a') as writer:
-    df2.to_excel(writer, sheet_name='Timetable', index=True)
-    print(df2)
 
 # with pd.ExcelWriter(f'{folder_data}/timetable.xlsx') as writer:
 #     df2.to_excel(writer, sheet_name='Timetable', index=True)
