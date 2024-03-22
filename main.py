@@ -12,10 +12,12 @@ print('Data loaded successfully!')
 # Employees sheet: 'Name'
 # Vacation sheet: 'Name', 'Vacation Start', 'Vacation End'
 
+
 # Function to generate timetable for each employee
 def generate_timetable(employee_name, vacation_dates):
     timetable = []
     today = datetime.now().date()
+    print()
     # Generating timetable for 5 working days per week
     for _ in range(5):
         # Check if the day falls within vacation period
@@ -40,11 +42,20 @@ for index, row in employee_data.iterrows():
     # Generating timetable
     employee_timetables[name] = generate_timetable(name, vacation_dates)
 
+print(employee_timetables)
 # Output timetable
-for name, timetable in employee_timetables.items():
-    print(f"Timetable for {name}:")
-    for entry in timetable:
-        print(f"Date: {entry[0]}, Employee: {entry[1]}, Shift: {entry[2]}")
+print("Timetable:")
+for i in range(5):
+    for shift in ["Morning", "Afternoon"]:
+        for name, timetable in employee_timetables.items():
+            if timetable:
+                entry = timetable.pop(0)
+                if entry[2] != "Vacation":
+                    print(f"Date: {entry[0]}, Shift: {entry[2]}, Employee: {entry[1]}")
+                    break
+
+
+
 
 # Save timetable to Excel
 # with pd.ExcelWriter(f'{folder_data}/timetable.xlsx') as writer:
@@ -55,9 +66,9 @@ for name, timetable in employee_timetables.items():
         
 
 # Create a unique dataframe for all employees knowing when each person works
-df = pd.DataFrame()
+df = pd.DataFrame(columns=['Date', 'Employee', 'Shift'])
 for name, timetable in employee_timetables.items():
-    df = df.append(pd.DataFrame(timetable, columns=['Date', 'Employee', 'Shift']))
+    df = df._append(pd.DataFrame(timetable, columns=['Date', 'Employee', 'Shift']))
 
 print(df)
 # Save timetable to Excel
