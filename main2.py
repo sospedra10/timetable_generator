@@ -1,7 +1,13 @@
 import pandas as pd
 import streamlit as st
 
-from utils import generate_timetable, create_timetable_dataframe
+from utils import generate_timetable, create_timetable_dataframe, get_employee_vacations
+
+
+st.set_page_config(layout="wide")
+st.title('Employee Timetable Generator')
+# select days for which to generate timetable
+days = st.slider('Select number of days to generate timetable:', 1, 30, 1)
 
 
 # Load data from Excel
@@ -16,13 +22,8 @@ vacation_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='V
 # List to store all employees
 employees = list(employee_data['Name'])
 
-# Dictionary to store vacation dates for each employee
-employee_vacations = {name: [] for name in employees}
-for index, row in vacation_data.iterrows():
-    employee_vacations[row['Name']].extend(pd.date_range(start=row['Vacation Start'], end=row['Vacation End']).tolist())
-print(employee_vacations)
-print()
-
+# Get vacation dates for each employee
+employee_vacations = get_employee_vacations(employees, vacation_data)
 
 # Generating timetables for each day
 employee_timetables = generate_timetable(days=7, employees=employees, employee_vacations=employee_vacations)
@@ -37,8 +38,4 @@ for date, timetable in employee_timetables.items():
 
 timetable_data = create_timetable_dataframe(employee_timetables, folder_data=folder_data)
     
-
-
-# with pd.ExcelWriter(f'{folder_data}/timetable.xlsx') as writer:
-#     df2.to_excel(writer, sheet_name='Timetable', index=True)
-
+st.dataframe(timetable_data)

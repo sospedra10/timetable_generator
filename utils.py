@@ -3,6 +3,15 @@ import itertools
 import pandas as pd
 
 
+
+def get_employee_vacations(employees, vacation_data):
+    # Dictionary to store vacation dates for each employee
+    employee_vacations = {name: [] for name in employees}
+    for index, row in vacation_data.iterrows():
+        employee_vacations[row['Name']].extend(pd.date_range(start=row['Vacation Start'], end=row['Vacation End']).tolist())
+    return employee_vacations
+
+
 # Function to generate timetable for each day
 def generate_daily_timetable(date, employees, vacation_dates):
     # convert date to datetime object
