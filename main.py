@@ -1,9 +1,11 @@
 import pandas as pd
 from datetime import datetime, timedelta
 
+
 # Load data from Excel
-employee_data = pd.read_excel('employee_data.xlsx', sheet_name='Employees')
-vacation_data = pd.read_excel('employee_data.xlsx', sheet_name='Vacation')
+folder_data = 'data'
+employee_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Employees')
+vacation_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Vacation')
 
 # Assuming the data structure:
 # Employees sheet: 'Name'
