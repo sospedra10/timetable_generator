@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import datetime, timedelta
-from utils import generate_daily_timetable
+from utils import generate_timetable
 
 # Load data from Excel
 folder_data = 'data'
@@ -10,9 +10,6 @@ vacation_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='V
 # Assuming the data structure:
 # Employees sheet: 'Name'
 # Vacation sheet: 'Name', 'Vacation Start', 'Vacation End'
-
-# Dictionary to store timetables for each employee
-employee_timetables = {}
 
 # List to store all employees
 employees = list(employee_data['Name'])
@@ -24,13 +21,9 @@ for index, row in vacation_data.iterrows():
 print(employee_vacations)
 print()
 
+
 # Generating timetables for each day
-start_date = datetime.now().date()
-end_date = start_date + timedelta(days=7)  # Assuming 30 days timetable
-current_date = start_date
-while current_date < end_date:
-    employee_timetables[current_date] = generate_daily_timetable(current_date, employees, employee_vacations)
-    current_date += timedelta(days=1)
+employee_timetables = generate_timetable(days=7, employees=employees, employee_vacations=employee_vacations)
 
 # Output timetable
 print("Timetable:")

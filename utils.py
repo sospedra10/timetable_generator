@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import itertools
 
 # Function to generate timetable for each day
@@ -26,3 +26,16 @@ def generate_daily_timetable(date, employees, vacation_dates):
         if not employee_assigned:
             daily_timetable.append((date, "No available employee", shift))
     return daily_timetable
+
+
+
+def generate_timetable(days, employees, employee_vacations):
+    # Dictionary to store timetables for each employee
+    employee_timetables = {}
+    start_date = datetime.now().date()
+    end_date = start_date + timedelta(days=days)
+    current_date = start_date
+    while current_date < end_date:
+        employee_timetables[current_date] = generate_daily_timetable(current_date, employees, employee_vacations)
+        current_date += timedelta(days=1)
+    return employee_timetables
