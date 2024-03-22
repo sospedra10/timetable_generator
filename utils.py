@@ -65,8 +65,8 @@ def create_timetable_dataframe(employee_timetables, folder_data=None):
     # Modify the column names to be the date in the format 'DD/MM/YYYY'
     timetable_data.columns = [date.strftime('%d/%m/%Y') for date in timetable_data.columns]
 
-    if folder_data:
+    # if folder_data:
         # Save timetable to Excel taking into account the multicolumn. Save it to a sheet called 'Timetable' in the file 'employee_data.xlsx'
-        with pd.ExcelWriter(f'{folder_data}/employee_data.xlsx', mode='a') as writer:
-            timetable_data.to_excel(writer, sheet_name='Timetable', index=True)
+        # with pd.ExcelWriter(f'{folder_data}/employee_data.xlsx', mode='a') as writer:
+        #     timetable_data.to_excel(writer, sheet_name='Timetable', index=True)
     return timetable_data
