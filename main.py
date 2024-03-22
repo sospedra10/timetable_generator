@@ -2,6 +2,11 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 
+
+# Make another dataframe with columns being (Date, Shift) using  multicolumn and rows being the Employee names timetable
+# df2 = df.pivot(index='Employee', columns=['Date', 'Shift'], values='Employee').fillna('-')
+
+
 # Load data from Excel
 folder_data = 'data'
 employee_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Employees')
