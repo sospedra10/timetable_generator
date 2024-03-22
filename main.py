@@ -6,18 +6,11 @@ from datetime import datetime, timedelta
 folder_data = 'data'
 employee_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Employees')
 vacation_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Vacation')
+print('Data loaded successfully!')
 
 # Assuming the data structure:
 # Employees sheet: 'Name'
 # Vacation sheet: 'Name', 'Vacation Start', 'Vacation End'
-
-# Function to convert date strings to datetime objects
-def str_to_date(date_str):
-    return datetime.strptime(date_str, '%d-%m-%Y')
-
-# Convert vacation dates to datetime objects
-vacation_data['Vacation Start'] = vacation_data['Vacation Start'].apply(str_to_date)
-vacation_data['Vacation End'] = vacation_data['Vacation End'].apply(str_to_date)
 
 # Function to generate timetable for each employee
 def generate_timetable(employee_name, vacation_dates):
@@ -52,3 +45,22 @@ for name, timetable in employee_timetables.items():
     print(f"Timetable for {name}:")
     for entry in timetable:
         print(f"Date: {entry[0]}, Employee: {entry[1]}, Shift: {entry[2]}")
+
+# Save timetable to Excel
+# with pd.ExcelWriter(f'{folder_data}/timetable.xlsx') as writer:
+#     for name, timetable in employee_timetables.items():
+#         df = pd.DataFrame(timetable, columns=['Date', 'Employee', 'Shift'])
+#         df.to_excel(writer, sheet_name=name, index=False)
+#         print(df)
+        
+
+# Create a unique dataframe for all employees knowing when each person works
+df = pd.DataFrame()
+for name, timetable in employee_timetables.items():
+    df = df.append(pd.DataFrame(timetable, columns=['Date', 'Employee', 'Shift']))
+
+print(df)
+# Save timetable to Excel
+# df.to_excel(f'{folder_data}/timetable.xlsx', index=False)   
+
+
