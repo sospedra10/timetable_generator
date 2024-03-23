@@ -1,4 +1,3 @@
-cat > README.md <<EOF
 # Employee Timetable Generator
 
 This is a Streamlit web application for generating timetables for employees, considering their vacation days. 
