@@ -20,9 +20,13 @@ vacation_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='V
 # Vacation sheet: 'Name', 'Vacation Start', 'Vacation End'
 
 
+tabs = ['Employees', 'Vacation', 'Timetable', 'Shift Counts']
+employees_tab, vacations_tab, timetable_tab, shift_counts_tab = st.tabs(tabs)
+
 # List to store all employees
 employees = list(employee_data['Name'])
-with st.expander("View Employees"):
+
+with employees_tab:
     st.write("#### Employees:")
     st.write(', '.join(employees))
 
@@ -30,7 +34,7 @@ with st.expander("View Employees"):
 # Get vacation dates for each employee
 employee_vacations = get_employee_vacations(employees, vacation_data)
 
-with st.expander("View Employee Vacations"):
+with vacations_tab:
     st.write("#### Employee Vacations:")
     for employee, vacations in employee_vacations.items():
         st.write(f"**{employee}**: {', '.join([str(vacation)[:10] for vacation in vacations])}")
@@ -50,11 +54,9 @@ for date, timetable in employee_timetables.items():
     for entry in timetable:
         print(f"Shift: {entry[2]}, Employee: {entry[1]}")
 
-
 tabular_data, timetable_data = create_timetable_dataframe(employee_timetables, folder_data=folder_data)
-    
 
-with st.expander("View Timetable"):
+with timetable_tab:
     st.write("#### Timetable:")
     st.dataframe(timetable_data)
 
@@ -62,7 +64,7 @@ with st.expander("View Timetable"):
 shift_counts = tabular_data.groupby(['Employee', 'Shift']).size().unstack().fillna(0)
 # shift_counts = shift_counts[['Employee', 'Morning', 'Afternoon']]
 
-with st.expander("View Shift Counts"):
+with shift_counts_tab:
     st.write("#### Shift Counts:")
     st.write(shift_counts)
 
