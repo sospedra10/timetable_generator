@@ -6,8 +6,10 @@ from utils import generate_timetable, create_timetable_dataframe, get_employee_v
 
 st.set_page_config(layout="wide")
 st.title('Employee Timetable Generator')
-# select days for which to generate timetable
-days = st.slider('Select number of days to generate timetable:', 1, 30, value=7, step=1)
+
+# Settings for generating timetable
+st.sidebar.markdown('### Settings:')
+days = st.sidebar.slider('Select number of days to generate timetable:', 1, 30, value=7, step=1)
 
 
 # Load data from Excel
