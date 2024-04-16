@@ -32,6 +32,8 @@ with employees_tab:
     st.write("#### Employees:")
     st.write(', '.join(employees))
 
+    employee_data = st.data_editor(employee_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")
+
 
 # Get vacation dates for each employee
 employee_vacations = get_employee_vacations(employees, vacation_data)
@@ -39,18 +41,13 @@ employee_vacations = get_employee_vacations(employees, vacation_data)
 with vacations_tab:
     st.write("#### Employee Vacations:")
 
-    vacation_data = st.data_editor(vacation_data.sort_values(by='Name'))  
+    vacation_data = st.data_editor(vacation_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")  
     # Save all data to Excel
     with pd.ExcelWriter(f'{folder_data}/employee_data.xlsx') as writer:
         employee_data.to_excel(writer, sheet_name='Employees', index=False)
         vacation_data.to_excel(writer, sheet_name='Vacation', index=False)
 
     save_data(folder_data, employee_data, vacation_data, timetable_data=None)
-
-    
-
-   
-    
 
     employee_vacations = get_employee_vacations(employees, vacation_data)
 
