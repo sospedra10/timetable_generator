@@ -70,3 +70,10 @@ def create_timetable_dataframe(employee_timetables, folder_data=None):
         # with pd.ExcelWriter(f'{folder_data}/employee_data.xlsx', mode='a') as writer:
         #     timetable_data.to_excel(writer, sheet_name='Timetable', index=True)
     return tabular_data, timetable_data
+
+
+def save_data(folder_data, employee_data, vacation_data, timetable_data):
+    with pd.ExcelWriter(f'{folder_data}/employee_data.xlsx') as writer:
+        employee_data.to_excel(writer, sheet_name='Employees', index=False)
+        vacation_data.to_excel(writer, sheet_name='Vacation', index=False)
+        timetable_data.to_excel(writer, sheet_name='Timetable', index=True)

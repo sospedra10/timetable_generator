@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from utils import generate_timetable, create_timetable_dataframe, get_employee_vacations
+from utils import generate_timetable, create_timetable_dataframe, get_employee_vacations, save_data
 
 
 st.set_page_config(layout="wide")
@@ -45,6 +45,10 @@ with vacations_tab:
         employee_data.to_excel(writer, sheet_name='Employees', index=False)
         vacation_data.to_excel(writer, sheet_name='Vacation', index=False)
 
+    save_data(folder_data, employee_data, vacation_data, timetable_data=None)
+
+    
+
    
     
 
@@ -76,11 +80,12 @@ with timetable_tab:
     st.write("#### Timetable:")
     st.dataframe(timetable_data)
 
-# count number of shifts per employee and per shift
-shift_counts = tabular_data.groupby(['Employee', 'Shift']).size().unstack().fillna(0)
-# shift_counts = shift_counts[['Employee', 'Morning', 'Afternoon']]
+
 
 with shift_counts_tab:
+    # count number of shifts per employee and per shift
+    shift_counts = tabular_data.groupby(['Employee', 'Shift']).size().unstack().fillna(0)
+    shift_counts = shift_counts[['Morning', 'Afternoon']]
     st.write("#### Shift Counts:")
     st.write(shift_counts)
 
