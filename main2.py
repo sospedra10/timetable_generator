@@ -16,6 +16,9 @@ days = st.sidebar.slider('Select number of days to generate timetable:', 1, 30, 
 folder_data = 'data'
 employee_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Employees')
 vacation_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Vacation')
+# vacation start and end without the time
+vacation_data['Vacation Start'] = pd.to_datetime(vacation_data['Vacation Start']).dt.date
+vacation_data['Vacation End'] = pd.to_datetime(vacation_data['Vacation End']).dt.date
 
 # Assuming the data structure:
 # Employees sheet: 'Name'
@@ -33,20 +36,23 @@ with employees_tab:
     st.write(', '.join(employees))
 
     employee_data = st.data_editor(employee_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")
+    # Save all data to Excel
+    save_data(folder_data, employee_data, vacation_data, timetable_data=None)
 
 
 # Get vacation dates for each employee
 employee_vacations = get_employee_vacations(employees, vacation_data)
 
+# Vacation number of days from employee_vacations dictionary
+# vacation_data['Days'] = [len(vacations) for employee, vacations in employee_vacations.items()]
+
 with vacations_tab:
     st.write("#### Employee Vacations:")
 
-    vacation_data = st.data_editor(vacation_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")  
-    # Save all data to Excel
-    with pd.ExcelWriter(f'{folder_data}/employee_data.xlsx') as writer:
-        employee_data.to_excel(writer, sheet_name='Employees', index=False)
-        vacation_data.to_excel(writer, sheet_name='Vacation', index=False)
 
+    vacation_data = st.data_editor(vacation_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")  
+    
+    # Save all data to Excel
     save_data(folder_data, employee_data, vacation_data, timetable_data=None)
 
     employee_vacations = get_employee_vacations(employees, vacation_data)
