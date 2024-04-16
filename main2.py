@@ -38,8 +38,21 @@ employee_vacations = get_employee_vacations(employees, vacation_data)
 
 with vacations_tab:
     st.write("#### Employee Vacations:")
+
+    vacation_data = st.data_editor(vacation_data.sort_values(by='Name'))  
+    # Save all data to Excel
+    with pd.ExcelWriter(f'{folder_data}/employee_data.xlsx') as writer:
+        employee_data.to_excel(writer, sheet_name='Employees', index=False)
+        vacation_data.to_excel(writer, sheet_name='Vacation', index=False)
+
+   
+    
+
+    employee_vacations = get_employee_vacations(employees, vacation_data)
+
     for employee, vacations in employee_vacations.items():
-        st.write(f"**{employee}**: {', '.join([str(vacation)[:10] for vacation in vacations])}")
+        # st.write(f"**{employee}**: {', '.join([str(vacation)[:10] for vacation in vacations])}")
+        st.write(f"**{employee}**: {len(vacations)}")
 
     # Plot vacation dates per employee
     st.write("#### Vacation Dates:")
@@ -55,6 +68,7 @@ for date, timetable in employee_timetables.items():
     print(f"Date: {date}")
     for entry in timetable:
         print(f"Shift: {entry[2]}, Employee: {entry[1]}")
+
 
 tabular_data, timetable_data = create_timetable_dataframe(employee_timetables, folder_data=folder_data)
 
