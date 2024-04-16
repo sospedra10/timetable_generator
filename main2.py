@@ -20,8 +20,8 @@ vacation_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='V
 # Vacation sheet: 'Name', 'Vacation Start', 'Vacation End'
 
 
-tabs = ['Employees', 'Vacation', 'Timetable', 'Shift Counts']
-employees_tab, vacations_tab, timetable_tab, shift_counts_tab = st.tabs(tabs)
+tabs = ['Timetable', 'Shift Counts', 'Employees', 'Vacation']
+timetable_tab, shift_counts_tab, employees_tab, vacations_tab = st.tabs(tabs)
 
 # List to store all employees
 employees = list(employee_data['Name'])
