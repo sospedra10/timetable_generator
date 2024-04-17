@@ -16,6 +16,7 @@ days = st.sidebar.slider('Select number of days to generate timetable:', 1, 30, 
 folder_data = 'data'
 employee_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Employees')
 vacation_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Vacation')
+print(employee_data)
 # vacation start and end without the time
 vacation_data['Vacation Start'] = pd.to_datetime(vacation_data['Vacation Start']).dt.date
 vacation_data['Vacation End'] = pd.to_datetime(vacation_data['Vacation End']).dt.date
