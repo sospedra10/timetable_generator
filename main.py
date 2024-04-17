@@ -1,82 +1,98 @@
 import pandas as pd
-from datetime import datetime, timedelta
+import streamlit as st
+
+from utils import generate_timetable, create_timetable_dataframe, get_employee_vacations, save_data
 
 
+st.set_page_config(layout="wide")
+st.title('Employee Timetable Generator')
 
-# Make another dataframe with columns being (Date, Shift) using  multicolumn and rows being the Employee names timetable
-# df2 = df.pivot(index='Employee', columns=['Date', 'Shift'], values='Employee').fillna('-')
+# Settings for generating timetable
+st.sidebar.markdown('### Settings:')
+days = st.sidebar.slider('Select number of days to generate timetable:', 1, 30, value=7, step=1)
 
 
 # Load data from Excel
 folder_data = 'data'
 employee_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Employees')
 vacation_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Vacation')
-print('Data loaded successfully!')
+# vacation start and end without the time
+vacation_data['Vacation Start'] = pd.to_datetime(vacation_data['Vacation Start']).dt.date
+vacation_data['Vacation End'] = pd.to_datetime(vacation_data['Vacation End']).dt.date
 
 # Assuming the data structure:
 # Employees sheet: 'Name'
 # Vacation sheet: 'Name', 'Vacation Start', 'Vacation End'
 
 
-# Function to generate timetable for each employee
-def generate_timetable(employee_name, vacation_dates):
-    timetable = []
-    today = datetime.now().date()
-    print()
-    # Generating timetable for 5 working days per week
-    for _ in range(5):
-        # Check if the day falls within vacation period
-        if today in vacation_dates:
-            timetable.append((today, employee_name, "Vacation"))
-        else:
-            # Assuming two shifts: morning and afternoon
-            timetable.append((today, employee_name, "Morning"))
-            timetable.append((today, employee_name, "Afternoon"))
-        today += timedelta(days=1)
-    return timetable
+tabs = ['Timetable', 'Shift Counts', 'Employees', 'Vacation']
+timetable_tab, shift_counts_tab, employees_tab, vacations_tab = st.tabs(tabs)
 
-# Dictionary to store timetables for each employee
-employee_timetables = {}
+# List to store all employees
+employees = list(employee_data['Name'])
 
-# Generating timetables for each employee
-for index, row in employee_data.iterrows():
-    name = row['Name']
-    # Get vacation dates for this employee
-    vacation_dates = vacation_data[vacation_data['Name'] == name][['Vacation Start', 'Vacation End']]
-    vacation_dates = [(start + timedelta(days=x)).date() for start, end in zip(vacation_dates['Vacation Start'], vacation_dates['Vacation End']) for x in range((end - start).days + 1)]
-    # Generating timetable
-    employee_timetables[name] = generate_timetable(name, vacation_dates)
+with employees_tab:
+    st.write("#### Employees:")
+    st.write(', '.join(employees))
 
-print(employee_timetables)
+    employee_data = st.data_editor(employee_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")
+    # Save all data to Excel
+    save_data(folder_data, employee_data, vacation_data, timetable_data=None)
+
+
+# Get vacation dates for each employee
+employee_vacations = get_employee_vacations(employees, vacation_data)
+
+# Vacation number of days from employee_vacations dictionary
+# vacation_data['Days'] = [len(vacations) for employee, vacations in employee_vacations.items()]
+
+with vacations_tab:
+    st.write("#### Employee Vacations:")
+
+
+    vacation_data = st.data_editor(vacation_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")  
+    
+    # Save all data to Excel
+    save_data(folder_data, employee_data, vacation_data, timetable_data=None)
+
+    employee_vacations = get_employee_vacations(employees, vacation_data)
+
+    for employee, vacations in employee_vacations.items():
+        # st.write(f"**{employee}**: {', '.join([str(vacation)[:10] for vacation in vacations])}")
+        st.write(f"**{employee}**: {len(vacations)}")
+
+    # Plot vacation dates per employee
+    st.write("#### Vacation Dates:")
+    st.bar_chart({employee: len(vacations) for employee, vacations in employee_vacations.items()})
+    
+
+# Generating timetables for each day
+employee_timetables = generate_timetable(days=days, employees=employees, employee_vacations=employee_vacations)
+
 # Output timetable
 print("Timetable:")
-for i in range(5):
-    for shift in ["Morning", "Afternoon"]:
-        for name, timetable in employee_timetables.items():
-            if timetable:
-                entry = timetable.pop(0)
-                if entry[2] != "Vacation":
-                    print(f"Date: {entry[0]}, Shift: {entry[2]}, Employee: {entry[1]}")
-                    break
+for date, timetable in employee_timetables.items():
+    print(f"Date: {date}")
+    for entry in timetable:
+        print(f"Shift: {entry[2]}, Employee: {entry[1]}")
+
+
+tabular_data, timetable_data = create_timetable_dataframe(employee_timetables, folder_data=folder_data)
+
+with timetable_tab:
+    st.write("#### Timetable:")
+    st.dataframe(timetable_data)
 
 
 
+with shift_counts_tab:
+    # count number of shifts per employee and per shift
+    shift_counts = tabular_data.groupby(['Employee', 'Shift']).size().unstack().fillna(0)
+    shift_counts = shift_counts[['Morning', 'Afternoon']]
+    st.write("#### Shift Counts:")
+    st.write(shift_counts)
 
-# Save timetable to Excel
-# with pd.ExcelWriter(f'{folder_data}/timetable.xlsx') as writer:
-#     for name, timetable in employee_timetables.items():
-#         df = pd.DataFrame(timetable, columns=['Date', 'Employee', 'Shift'])
-#         df.to_excel(writer, sheet_name=name, index=False)
-#         print(df)
-        
-
-# Create a unique dataframe for all employees knowing when each person works
-df = pd.DataFrame(columns=['Date', 'Employee', 'Shift'])
-for name, timetable in employee_timetables.items():
-    df = df._append(pd.DataFrame(timetable, columns=['Date', 'Employee', 'Shift']))
-
-print(df)
-# Save timetable to Excel
-# df.to_excel(f'{folder_data}/timetable.xlsx', index=False)   
+    # Plot shift counts
+    st.bar_chart(shift_counts)
 
 
