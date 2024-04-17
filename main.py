@@ -35,16 +35,32 @@ with employees_tab:
     st.write("#### Employees:")
     st.write(', '.join(employees))
 
-    employee_data = st.data_editor(employee_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")
-    # Save all data to Excel
-    save_data(folder_data, employee_data, vacation_data, timetable_data=None)
+    st.dataframe(employee_data)
+
+    # not at the moment (some errors)
+    # employee_data = st.data_editor(employee_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")
+    # # Save all data to Excel
+    # save_data(folder_data, employee_data, vacation_data, timetable_data=None)
+
+
 
 
 # Get vacation dates for each employee
 employee_vacations = get_employee_vacations(employees, vacation_data)
+print('vacation_data')
+print(vacation_data)
 
 # Vacation number of days from employee_vacations dictionary
-# vacation_data['Days'] = [len(vacations) for employee, vacations in employee_vacations.items()]
+vacation_data['Days'] = [(vacation_data.iloc[i]['Vacation End'] - vacation_data.iloc[i]['Vacation Start']).days+1 for i in range(len(vacation_data))]
+
+# for i in range(len(vacation_data)):
+#     vac = vacation_data.iloc[i]
+#     print(vac['Name'], vac['Vacation Start'], vac['Vacation End'])
+#     print(vac['Vacation End'] - vac['Vacation Start'])
+#     print((vac['Vacation End'] - vac['Vacation Start']).days+1)
+#     print('---')
+
+
 
 with vacations_tab:
     st.write("#### Employee Vacations:")
@@ -58,13 +74,14 @@ with vacations_tab:
     employee_vacations = get_employee_vacations(employees, vacation_data)
 
     for employee, vacations in employee_vacations.items():
-        # st.write(f"**{employee}**: {', '.join([str(vacation)[:10] for vacation in vacations])}")
         st.write(f"**{employee}**: {len(vacations)}")
 
     # Plot vacation dates per employee
     st.write("#### Vacation Dates:")
     st.bar_chart({employee: len(vacations) for employee, vacations in employee_vacations.items()})
     
+
+
 
 # Generating timetables for each day
 employee_timetables = generate_timetable(days=days, employees=employees, employee_vacations=employee_vacations)
@@ -75,6 +92,8 @@ for date, timetable in employee_timetables.items():
     print(f"Date: {date}")
     for entry in timetable:
         print(f"Shift: {entry[2]}, Employee: {entry[1]}")
+
+
 
 
 tabular_data, timetable_data = create_timetable_dataframe(employee_timetables, folder_data=folder_data)

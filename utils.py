@@ -8,7 +8,8 @@ def get_employee_vacations(employees, vacation_data):
     # Dictionary to store vacation dates for each employee
     employee_vacations = {name: [] for name in employees}
     for index, row in vacation_data.iterrows():
-        employee_vacations[row['Name']].extend(pd.date_range(start=row['Vacation Start'], end=row['Vacation End']).tolist())
+        if row['Name'] is not None:
+            employee_vacations[row['Name']].extend(pd.date_range(start=row['Vacation Start'], end=row['Vacation End']).tolist())
     return employee_vacations
 
 
@@ -16,17 +17,17 @@ def get_employee_vacations(employees, vacation_data):
 def generate_daily_timetable(date, employees, vacation_dates):
     # convert date to datetime object
     date = datetime.strptime(str(date), '%Y-%m-%d')
-    print('date:', date)
+    # print('date:', date)
     daily_timetable = []
     for shift in ["Morning", "Afternoon"]:
-        print('Shift:', shift)
+        # print('Shift:', shift)
         employee_assigned = False
         for employee in itertools.cycle(employees):
-            print('Employee:', employee)
+            # print('Employee:', employee)
             employee_vacation_dates = vacation_dates[employee]
-            print('employee_vacation_dates:', employee_vacation_dates)
+            # print('employee_vacation_dates:', employee_vacation_dates)
             if date not in employee_vacation_dates:
-                print('date not in employee_vacation_dates: No vacation: Assigned employee!')
+                # print('date not in employee_vacation_dates: No vacation: Assigned employee!')
                 daily_timetable.append((date, employee, shift))
                 # Remove assigned employee from the list because they can't work twice in a day
                 employees.remove(employee)
