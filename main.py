@@ -31,6 +31,7 @@ timetable_tab, shift_counts_tab, employees_tab, vacations_tab = st.tabs(tabs)
 
 # List to store all employees
 employees = list(employee_data['Name'])
+employees_estancos = employee_data.values[:, 1:]
 
 with employees_tab:
     st.write("#### Employees:")
@@ -85,23 +86,38 @@ with vacations_tab:
 
 
 # Generating timetables for each day
-employee_timetables = generate_timetable(days=days, employees=employees, employee_vacations=employee_vacations)
+employee_timetables = generate_timetable(days=days, employees=employees, employees_estancos=employees_estancos, employee_vacations=employee_vacations)
+
+print('----')
+print(employee_timetables)
+print('----')
 
 # Output timetable
 print("Timetable:")
-for date, timetable in employee_timetables.items():
-    print(f"Date: {date}")
-    for entry in timetable:
-        print(f"Shift: {entry[2]}, Employee: {entry[1]}")
+for estanco in range(employees_estancos.shape[1]):
+    print(f"Estanco {estanco+1}:")
+    for date, timetable in employee_timetables[f'estanco_{estanco+1}'].items():
+        print(f"Date: {date}")
+        for entry in timetable:
+            print(f"Shift: {entry[2]}, Employee: {entry[1]}")
 
 
+estancos_timetables_df = []
+for estanco in range(employees_estancos.shape[1]):
+    tabular_data, timetable_data = create_timetable_dataframe(employee_timetables[f'estanco_{estanco+1}'], folder_data=folder_data)
+    estancos_timetables_df.append((tabular_data, timetable_data))
 
-
-tabular_data, timetable_data = create_timetable_dataframe(employee_timetables, folder_data=folder_data)
+# tabular_data, timetable_data = create_timetable_dataframe(employee_timetables, folder_data=folder_data)
 
 with timetable_tab:
     st.write("#### Timetable:")
-    st.dataframe(timetable_data)
+
+    for estanco in range(employees_estancos.shape[1]):
+        tabular_data, timetable_data = estancos_timetables_df[estanco]
+        st.write(f"**Estanco {estanco+1}:**")
+        # st.dataframe(tabular_data)
+        st.dataframe(timetable_data)
+    # st.dataframe(timetable_data)
 
 
 

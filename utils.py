@@ -14,7 +14,7 @@ def get_employee_vacations(employees, vacation_data):
 
 
 # Function to generate timetable for each day
-def generate_daily_timetable(date, employees, vacation_dates):
+def generate_daily_timetable(date, employees, employees_estancos, vacation_dates):
     # convert date to datetime object
     date = datetime.strptime(str(date), '%Y-%m-%d')
     # print('date:', date)
@@ -41,15 +41,31 @@ def generate_daily_timetable(date, employees, vacation_dates):
 
 
 
-def generate_timetable(days, employees, employee_vacations):
+def generate_timetable(days, employees, employees_estancos, employee_vacations):
     # Dictionary to store timetables for each employee
     employee_timetables = {}
     start_date = datetime.now().date()
     end_date = start_date + timedelta(days=days)
     current_date = start_date
+
+    
+
     while current_date < end_date:
-        employee_timetables[current_date] = generate_daily_timetable(current_date, employees, employee_vacations)
+        print('current_date:', current_date)
+        print('employees:', employees)
+        print()
+
+        for estanco in range(employees_estancos.shape[1]):
+    #     employees_estanco = employees_estancos[:, estanco]
+            estanco_name = f'estanco_{estanco+1}'
+            if estanco_name not in employee_timetables:
+                employee_timetables[estanco_name] = {}
+            
+            employee_timetables[f'estanco_{estanco+1}'][current_date] = generate_daily_timetable(current_date, employees, employees_estancos, employee_vacations) 
+        
         current_date += timedelta(days=1)
+    print('current_date:', current_date)
+    print('employees:', employees)
     return employee_timetables
 
 
