@@ -37,7 +37,7 @@ with employees_tab:
     st.write("#### Employees:")
     st.write(', '.join(employees))
 
-    st.dataframe(employee_data)
+    st.dataframe(employee_data, use_container_width=True)
 
     # not at the moment (some errors)
     # employee_data = st.data_editor(employee_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")
@@ -68,7 +68,7 @@ with vacations_tab:
     st.write("#### Employee Vacations:")
 
 
-    vacation_data = st.data_editor(vacation_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")  
+    vacation_data = st.data_editor(vacation_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic", use_container_width=True)  
     
     # Save all data to Excel
     save_data(folder_data, employee_data, vacation_data, timetable_data=None)
