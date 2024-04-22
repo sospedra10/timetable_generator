@@ -23,8 +23,21 @@ def generate_daily_timetable(date, employees, employees_estancos, vacation_dates
         # print('Shift:', shift)
         employee_assigned = False
         for employee in itertools.cycle(employees):
-            if employees_estancos[employees_estancos['Name'] == employee][estanco] == 1: # if employee can work in the estanco
-                break
+            print('employeez estancos', estanco)
+            print(employees_estancos)
+            print()
+            print(employees_estancos[employees_estancos['Name'] == employee][estanco].values[0])
+            if employees_estancos[employees_estancos['Name'] == employee][estanco].values[0] == 0: # if employee can work in the estanco
+                continue
+
+            # Find if employee is available to work on the date or it is already assigned to work on the date on another estanco
+            # for estanco_name, timetable in employee_timetables.items():
+            #     if estanco_name != estanco:
+            #         if date in timetable:
+            #             for entry in timetable[date]:
+            #                 if entry[1] == employee:
+            #                     break
+
             # if employee not in employee_timetables[estanco]:
             # print('Employee:', employee)
             employee_vacation_dates = vacation_dates[employee]
@@ -51,20 +64,19 @@ def generate_timetable(days, employees, employees_estancos, employee_vacations):
     end_date = start_date + timedelta(days=days)
     current_date = start_date
 
-    
 
     while current_date < end_date:
         print('current_date:', current_date)
         print('employees:', employees)
         print()
 
-        for estanco in range(employees_estancos.shape[1]):
+        for estanco in range(employees_estancos.shape[1] - 1):
     #     employees_estanco = employees_estancos[:, estanco]
-            estanco_name = f'estanco_{estanco+1}'
+            estanco_name = f'Estanco_{estanco+1}'
             if estanco_name not in employee_timetables:
                 employee_timetables[estanco_name] = {}
             
-            employee_timetables[estanco_name][current_date] = generate_daily_timetable(current_date, employees, employees_estancos, employee_vacations, employee_timetables, f'Estanco_{estanco+1}') 
+            employee_timetables[estanco_name][current_date] = generate_daily_timetable(current_date, employees, employees_estancos, employee_vacations, employee_timetables, estanco_name) 
         
         current_date += timedelta(days=1)
     print('current_date:', current_date)
