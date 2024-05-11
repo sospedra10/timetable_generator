@@ -13,30 +13,35 @@ def get_employee_vacations(employees, vacation_data):
     return employee_vacations
 
 
+def employee_is_free(employee, original_date, timetable):
+    print(timetable)
+    if original_date in timetable:
+        for entry in timetable[original_date]:
+            print('entry:', entry)
+            print(entry[1], employee)
+            if entry[1] == employee:  # if employee is already assigned to work on the date: continue
+                break
+    print()
+
+
 # Function to generate timetable for each day
-def generate_daily_timetable(date, employees, employees_estancos, vacation_dates, employee_timetables, estanco):
+def generate_daily_timetable(original_date, employees, employees_estancos, vacation_dates, employee_timetables, estanco):
     # convert date to datetime object
-    date = datetime.strptime(str(date), '%Y-%m-%d')
+    date = datetime.strptime(str(original_date), '%Y-%m-%d')
     # print('date:', date)
     daily_timetable = []
     for shift in ["Morning", "Afternoon"]:
         # print('Shift:', shift)
         employee_assigned = False
         for employee in itertools.cycle(employees):
-            print('employeez estancos', estanco)
-            print(employees_estancos)
-            print()
-            print(employees_estancos[employees_estancos['Name'] == employee][estanco].values[0])
-            if employees_estancos[employees_estancos['Name'] == employee][estanco].values[0] == 0: # if employee can work in the estanco
+            if employees_estancos[employees_estancos['Name'] == employee][estanco].values[0] == 0: # if employee can't work in the estanco: continue
                 continue
 
             # Find if employee is available to work on the date or it is already assigned to work on the date on another estanco
-            # for estanco_name, timetable in employee_timetables.items():
-            #     if estanco_name != estanco:
-            #         if date in timetable:
-            #             for entry in timetable[date]:
-            #                 if entry[1] == employee:
-            #                     break
+            for estanco_name, timetable in employee_timetables.items():
+                if estanco_name != estanco:
+                    print('estanco_name:', estanco_name, original_date)
+                    employee_is_free = employee_is_free(employee, original_date, timetable)
 
             # if employee not in employee_timetables[estanco]:
             # print('Employee:', employee)
