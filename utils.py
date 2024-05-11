@@ -35,7 +35,6 @@ def employee_is_free(estanco, employee, original_date, employee_timetables, dail
 
 # Function to generate timetable for each day
 def generate_daily_timetable(original_date, employees, employees_estancos, vacation_dates, employee_timetables, estanco):
-    print('Estanco:', estanco)
     # convert date to datetime object
     date = datetime.strptime(str(original_date), '%Y-%m-%d')
     # print('date:', date)
@@ -48,11 +47,8 @@ def generate_daily_timetable(original_date, employees, employees_estancos, vacat
                 continue
 
             # Find if employee is available to work on the date or it is already assigned to work on the date on another estanco
-            
             if not employee_is_free(estanco, employee, original_date, employee_timetables, daily_timetable):
-                print('Employee is not free')
                 continue
-
             
             employee_vacation_dates = vacation_dates[employee]
             if date not in employee_vacation_dates:
@@ -65,7 +61,6 @@ def generate_daily_timetable(original_date, employees, employees_estancos, vacat
                 break
         if not employee_assigned:
             daily_timetable.append((date, "No available employee", shift))
-            print('No available employee!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     return daily_timetable
 
 
@@ -79,10 +74,6 @@ def generate_timetable(days, employees, employees_estancos, employee_vacations):
 
 
     while current_date < end_date:
-        print('current_date:', current_date)
-        print('employees:', employees)
-        print()
-
         for estanco in range(employees_estancos.shape[1] - 1):
     #     employees_estanco = employees_estancos[:, estanco]
             estanco_name = f'Estanco_{estanco+1}'
@@ -92,9 +83,58 @@ def generate_timetable(days, employees, employees_estancos, employee_vacations):
             employee_timetables[estanco_name][current_date] = generate_daily_timetable(current_date, employees, employees_estancos, employee_vacations, employee_timetables, estanco_name) 
         # break
         current_date += timedelta(days=1)
-    print('current_date:', current_date)
-    print('employees:', employees)
     return employee_timetables
+
+
+def generate_optimized_timetable(days, employees, employees_estancos, employee_vacations):
+    best_score = float('inf')
+    best_employee_timetables = None
+
+    # Generate all possible permutations of employees
+    employee_permutations = [list(permutation) for permutation in list(itertools.permutations(employees))]
+    print('length of employee_permutations:', len(employee_permutations))
+    i = 0
+    for permutation in employee_permutations:
+        # Generating timetables for each day
+        employee_timetables = generate_timetable(days=days, employees=permutation, employees_estancos=employees_estancos, employee_vacations=employee_vacations)
+        # This is the score that we want to minimize (Count of the number of shifts that couldn't be assigned)
+        score = count_shifts(employee_timetables, type='unabailable')
+        if score < best_score:
+            best_score = score
+            best_employee_timetables = employee_timetables
+            print('Score:', score)
+        print('Iteration:', i, 'out of ', len(employee_permutations), 'Percentage:', i/len(employee_permutations)*100)
+    return best_employee_timetables, best_score
+
+
+
+
+def count_shifts(employee_timetables, type='all'):
+    """
+    Count the number of shifts per employee and per shift type
+
+    Parameters
+    ----------
+    employee_timetables : dict
+        Dictionary containing the timetables for each employee
+    type : str, optional
+        Type of shifts to count. The default is 'all'.
+        Options: 'all', 'unabailable'
+    """
+    # Count number of shifts per employee and per shift
+    shift_counts = pd.DataFrame(columns=['Employee', 'Morning', 'Afternoon', 'Total'])
+    for estanco, timetable in employee_timetables.items():
+        for date, shifts in timetable.items():
+            for shift in shifts:
+                if shift[1] != 'No available employee' and type == 'all' or shift[1] == 'No available employee' and type == 'unabailable':
+                    if shift[1] not in shift_counts['Employee'].values:
+                        shift_counts = pd.concat([shift_counts, pd.DataFrame({'Employee': [shift[1]], 'Morning': [0], 'Afternoon': [0], 'Total': [0]})], ignore_index=True)
+                        # shift_counts = shift_counts.append({'Employee': shift[1], 'Morning': 0, 'Afternoon': 0, 'Total': 0}, ignore_index=True)
+                    shift_counts.loc[shift_counts['Employee'] == shift[1], shift[2]] += 1
+                    shift_counts.loc[shift_counts['Employee'] == shift[1], 'Total'] += 1
+    if type == 'unabailable':
+        return shift_counts['Total'].iloc[0]
+    return shift_counts
 
 
 def create_timetable_dataframe(employee_timetables, folder_data=None):
