@@ -86,10 +86,16 @@ with vacations_tab:
 
 get_timetables_button = st.sidebar.button('Get Timetables')
 if get_timetables_button:
+    
 
 
     # Generating timetables for each day
-    employee_timetables = generate_timetable(days=days, employees=employees, employees_estancos=employees_estancos, employee_vacations=employee_vacations)
+    # employee_timetables = generate_timetable(days=days, employees=employees, employees_estancos=employees_estancos, employee_vacations=employee_vacations)
+    from utils import generate_optimized_timetable
+    employee_timetables, score = generate_optimized_timetable(days, employees, employees_estancos, employee_vacations)
+
+    from utils import count_shifts
+    st.write(count_shifts(employee_timetables, type='unabailable'))
 
     print('----')
     print(employee_timetables)

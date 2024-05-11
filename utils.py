@@ -93,6 +93,7 @@ def generate_optimized_timetable(days, employees, employees_estancos, employee_v
     # Generate all possible permutations of employees
     employee_permutations = [list(permutation) for permutation in list(itertools.permutations(employees))]
     print('length of employee_permutations:', len(employee_permutations))
+    employee_permutations = employee_permutations[:300]
     i = 0
     for permutation in employee_permutations:
         # Generating timetables for each day
@@ -102,8 +103,8 @@ def generate_optimized_timetable(days, employees, employees_estancos, employee_v
         if score < best_score:
             best_score = score
             best_employee_timetables = employee_timetables
-            print('Score:', score)
-        print('Iteration:', i, 'out of ', len(employee_permutations), 'Percentage:', i/len(employee_permutations)*100)
+        print('Iteration:', i, 'Score:', score, 'out of ', len(employee_permutations), 'Percentage:', i/len(employee_permutations)*100)
+        i += 1
     return best_employee_timetables, best_score
 
 
