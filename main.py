@@ -84,52 +84,58 @@ with vacations_tab:
     st.bar_chart({employee: len(vacations) for employee, vacations in employee_vacations.items()})
     
 
+get_timetables_button = st.sidebar.button('Get Timetables')
+if get_timetables_button:
 
 
-# Generating timetables for each day
-employee_timetables = generate_timetable(days=days, employees=employees, employees_estancos=employees_estancos, employee_vacations=employee_vacations)
+    # Generating timetables for each day
+    employee_timetables = generate_timetable(days=days, employees=employees, employees_estancos=employees_estancos, employee_vacations=employee_vacations)
 
-print('----')
-print(employee_timetables)
-print('----')
+    print('----')
+    print(employee_timetables)
+    print('----')
 
-# Output timetable
-print("Timetable:")
-for estanco in range(n_estancos):
-    print(f"Estanco {estanco+1}:")
-    for date, timetable in employee_timetables[f'Estanco_{estanco+1}'].items():
-        print(f"Date: {date}")
-        for entry in timetable:
-            print(f"Shift: {entry[2]}, Employee: {entry[1]}")
+    # Output timetable
+    print("Timetable:")
+    for estanco in range(n_estancos):
+        print(f"Estanco {estanco+1}:")
+        for date, timetable in employee_timetables[f'Estanco_{estanco+1}'].items():
+            print(f"Date: {date}")
+            for entry in timetable:
+                print(f"Shift: {entry[2]}, Employee: {entry[1]}")
 
 
-estancos_timetables_df = []
-for estanco in range(n_estancos):
-    tabular_data, timetable_data = create_timetable_dataframe(employee_timetables[f'Estanco_{estanco+1}'], folder_data=folder_data)
-    estancos_timetables_df.append((tabular_data, timetable_data))
+
 
 # tabular_data, timetable_data = create_timetable_dataframe(employee_timetables, folder_data=folder_data)
 
 with timetable_tab:
-    st.write("#### Timetable:")
+    st.write("#### Timetables:")
 
-    for estanco in range(n_estancos):
-        tabular_data, timetable_data = estancos_timetables_df[estanco]
-        st.write(f"**Estanco {estanco+1}:**")
-        # st.dataframe(tabular_data)
-        st.dataframe(timetable_data)
-    # st.dataframe(timetable_data)
+    if get_timetables_button:
+
+        estancos_timetables_df = []
+        for estanco in range(n_estancos):
+            tabular_data, timetable_data = create_timetable_dataframe(employee_timetables[f'Estanco_{estanco+1}'], folder_data=folder_data)
+            estancos_timetables_df.append((tabular_data, timetable_data))
+
+        for estanco in range(n_estancos):
+            tabular_data, timetable_data = estancos_timetables_df[estanco]
+            st.write(f"**Estanco {estanco+1}:**")
+            # st.dataframe(tabular_data)
+            st.dataframe(timetable_data)
+        # st.dataframe(timetable_data)
 
 
 
-with shift_counts_tab:
-    # count number of shifts per employee and per shift
-    shift_counts = tabular_data.groupby(['Employee', 'Shift']).size().unstack().fillna(0)
-    shift_counts = shift_counts[['Morning', 'Afternoon']]
-    st.write("#### Shift Counts:")
-    st.write(shift_counts)
+# with shift_counts_tab:
+#     # count number of shifts per employee and per shift
+#     shift_counts = tabular_data.groupby(['Employee', 'Shift']).size().unstack().fillna(0)
+#     shift_counts = shift_counts[['Morning', 'Afternoon']]
+#     st.write("#### Shift Counts:")
+#     st.write(shift_counts)
 
-    # Plot shift counts
-    st.bar_chart(shift_counts)
+#     # Plot shift counts
+#     st.bar_chart(shift_counts)
 
 
