@@ -13,25 +13,23 @@ def get_employee_vacations(employees, vacation_data):
     return employee_vacations
 
 
-def employee_is_free(estanco, employee, original_date, employee_timetables, daily_timetable):
-    print('daily timetable', daily_timetable)
-
-    # daily timetable [(datetime.datetime(2024, 5, 17, 0, 0), 'Mario', 'Morning')]
-    # First, check if the employee is already assigned to work on the date for not working twice ont he same day
+def employee_is_working_today(employee, daily_timetable):
     if len(daily_timetable) > 0 and daily_timetable[0][1] == employee:
+        return True
+    return False
+
+# Function to check if employee is free to work on the date
+def employee_is_free(estanco, employee, original_date, employee_timetables, daily_timetable):
+    # First, check if the employee is already assigned to work on the date for not working twice ont he same day
+    if employee_is_working_today(employee, daily_timetable):
         return False
 
     for estanco_name, timetable in employee_timetables.items():
         if estanco_name != estanco:
-            print('estanco_name:', estanco_name, original_date)
-            print(timetable)
             if original_date in timetable:
                 for entry in timetable[original_date]:
-                    print('entry:', entry)
-                    print(entry[1], employee)
                     if entry[1] == employee:  # if employee is already assigned to work on the date: continue
                         return False
-        print()
     return True
 
 
