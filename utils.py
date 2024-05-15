@@ -93,7 +93,7 @@ def generate_optimized_timetable(days, employees, employees_estancos, employee_v
     # Generate all possible permutations of employees
     employee_permutations = [list(permutation) for permutation in list(itertools.permutations(employees))]
     print('length of employee_permutations:', len(employee_permutations))
-    employee_permutations = employee_permutations[:300]
+    employee_permutations = employee_permutations[:30]
     i = 0
     for permutation in employee_permutations:
         # Generating timetables for each day

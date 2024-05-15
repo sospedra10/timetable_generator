@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+import time
 
 from utils import generate_timetable, create_timetable_dataframe, get_employee_vacations, save_data
 
@@ -31,8 +32,8 @@ timetable_tab, shift_counts_tab, employees_tab, vacations_tab = st.tabs(tabs)
 
 # List to store all employees
 employees = list(employee_data['Name'])
-employees_estancos = employee_data
-n_estancos = employees_estancos.shape[1] - 1
+st.session_state.employees_estancos = employee_data
+n_estancos = st.session_state.employees_estancos.shape[1] - 1
 
 
 @st.experimental_dialog("Add employee:")
@@ -42,26 +43,37 @@ def show_add_employee_dialog():
     new_employee_estancos = [st.checkbox(f'Estanco {i+1}') for i in range(n_estancos)]
 
     if st.button('Submit'):
+        if new_employee_name in employees:
+            st.error(f"Employee {new_employee_name} already exists")
+            return
+        if len(new_employee_name) == 0:
+            st.error("Employee name can't be empty")
+            return
+        if not any(new_employee_estancos):
+            st.error("Employee must work in at least one estanco")
+            return
         employees.append(new_employee_name)
-        employees_estancos = employees_estancos.append({'Name': new_employee_name, **{f'Estanco_{i+1}': int(new_employee_estancos[i]) for i in range(n_estancos)}}, ignore_index=True)
-        st.write(f"Added new employee: {new_employee_name}")
-        st.write(', '.join(employees))
-        # save_data(folder_data, employee_data, vacation_data, timetable_data=None)
+        new_employee = pd.DataFrame({'Name': new_employee_name, **{f'Estanco_{i+1}': int(new_employee_estancos[i]) for i in range(n_estancos)}}, index=[0])
+        st.session_state.employees_estancos = pd.concat([st.session_state.employees_estancos, new_employee], ignore_index=True)
+        st.success(f"Added new employee: {new_employee_name}")
+        save_data(folder_data, st.session_state.employees_estancos, vacation_data, timetable_data=None)
+
+        time.sleep(3)
+        st.rerun()
 
 with employees_tab:
     st.write("#### Employees:")
-    st.write(', '.join(employees))
-
     # Tranform employee dataset to a dataframe with employee names as "Name" columna and another column for the estancos he woorks in as a unique string as "1, 2, 4"
     employees_display_df = {}
     for i, employee in enumerate(employees):
         estancos = []
         for estanco in range(n_estancos):
-            if employees_estancos[f'Estanco_{estanco+1}'].iloc[i] == 1:
+            if st.session_state.employees_estancos[f'Estanco_{estanco+1}'].iloc[i] == 1:
                 estancos.append(str(estanco+1))
         employees_display_df[employee] = ', '.join(estancos)
     
     employees_display_df = pd.DataFrame(employees_display_df.items(), columns=['Name', 'Estancos'])
+
     
     # Display employee data
     # st.dataframe(employee_data, use_container_width=True)
@@ -122,9 +134,9 @@ if get_timetables_button:
 
 
     # Generating timetables for each day
-    # employee_timetables = generate_timetable(days=days, employees=employees, employees_estancos=employees_estancos, employee_vacations=employee_vacations)
+    # employee_timetables = generate_timetable(days=days, employees=employees, st.session_state.employees_estancos=st.session_state.employees_estancos, employee_vacations=employee_vacations)
     from utils import generate_optimized_timetable
-    employee_timetables, score = generate_optimized_timetable(days, employees, employees_estancos, employee_vacations)
+    employee_timetables, score = generate_optimized_timetable(days, employees, st.session_state.employees_estancos, employee_vacations)
 
     from utils import count_shifts
     st.write(count_shifts(employee_timetables, type='unabailable'))
