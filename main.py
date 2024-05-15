@@ -34,11 +34,43 @@ employees = list(employee_data['Name'])
 employees_estancos = employee_data
 n_estancos = employees_estancos.shape[1] - 1
 
+
+@st.experimental_dialog("Add employee:")
+def show_add_employee_dialog():
+    new_employee_name = st.text_input('Name:')
+    st.write('**Estancos:**')
+    new_employee_estancos = [st.checkbox(f'Estanco {i+1}') for i in range(n_estancos)]
+
+    if st.button('Submit'):
+        employees.append(new_employee_name)
+        employees_estancos = employees_estancos.append({'Name': new_employee_name, **{f'Estanco_{i+1}': int(new_employee_estancos[i]) for i in range(n_estancos)}}, ignore_index=True)
+        st.write(f"Added new employee: {new_employee_name}")
+        st.write(', '.join(employees))
+        # save_data(folder_data, employee_data, vacation_data, timetable_data=None)
+
 with employees_tab:
     st.write("#### Employees:")
     st.write(', '.join(employees))
 
-    st.dataframe(employee_data, use_container_width=True)
+    # Tranform employee dataset to a dataframe with employee names as "Name" columna and another column for the estancos he woorks in as a unique string as "1, 2, 4"
+    employees_display_df = {}
+    for i, employee in enumerate(employees):
+        estancos = []
+        for estanco in range(n_estancos):
+            if employees_estancos[f'Estanco_{estanco+1}'].iloc[i] == 1:
+                estancos.append(str(estanco+1))
+        employees_display_df[employee] = ', '.join(estancos)
+    
+    employees_display_df = pd.DataFrame(employees_display_df.items(), columns=['Name', 'Estancos'])
+    
+    # Display employee data
+    # st.dataframe(employee_data, use_container_width=True)
+
+    add_employee_btn = st.button('Add Employee')
+    if add_employee_btn:
+        show_add_employee_dialog()
+
+    st.dataframe(employees_display_df, use_container_width=True, hide_index=True)
 
     # not at the moment (some errors)
     # employee_data = st.data_editor(employee_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")

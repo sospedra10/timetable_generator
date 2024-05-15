@@ -86,7 +86,7 @@ def generate_timetable(days, employees, employees_estancos, employee_vacations):
     return employee_timetables
 
 
-def generate_optimized_timetable(days, employees, employees_estancos, employee_vacations):
+def generate_optimized_timetable(days, employees, employees_estancos, employee_vacations)   :
     best_score = float('inf')
     best_employee_timetables = None
 
