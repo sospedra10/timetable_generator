@@ -93,7 +93,11 @@ def generate_optimized_timetable(days, employees, employees_estancos, employee_v
     # Generate all possible permutations of employees
     employee_permutations = [list(permutation) for permutation in list(itertools.permutations(employees))]
     print('length of employee_permutations:', len(employee_permutations))
-    employee_permutations = employee_permutations[:30]
+    # Get 100 random sample of employees
+    import random
+    employee_permutations = random.sample(employee_permutations, 10)
+
+
     i = 0
     for permutation in employee_permutations:
         # Generating timetables for each day
@@ -134,7 +138,9 @@ def count_shifts(employee_timetables, type='all'):
                     shift_counts.loc[shift_counts['Employee'] == shift[1], shift[2]] += 1
                     shift_counts.loc[shift_counts['Employee'] == shift[1], 'Total'] += 1
     if type == 'unabailable':
-        return shift_counts['Total'].iloc[0]
+        if shift_counts.shape[0] > 0:
+            return shift_counts['Total'].iloc[0]
+        return 0
     return shift_counts
 
 
