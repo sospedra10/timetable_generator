@@ -37,8 +37,9 @@ n_estancos = st.session_state.employees_estancos.shape[1] - 1
 
 
 @st.experimental_dialog("Add employee:")
-def show_add_employee_dialog():
-    new_employee_name = st.text_input('Name:')
+def add_employee():
+    "Dialog to add a new employee to the system."
+    new_employee_name = st.text_input('**Name:**')
     st.write('**Estancos:**')
     new_employee_estancos = [st.checkbox(f'Estanco {i+1}') for i in range(n_estancos)]
 
@@ -58,7 +59,35 @@ def show_add_employee_dialog():
         st.success(f"Added new employee: {new_employee_name}")
         save_data(folder_data, st.session_state.employees_estancos, vacation_data, timetable_data=None)
 
-        time.sleep(3)
+        st.rerun()
+
+
+@st.experimental_dialog("Edit employee:")
+def edit_employee():
+    "Dialog to edit an existing employee in the system."
+    employee_name = st.selectbox('Select employee:', employees)
+    employee_data = st.session_state.employees_estancos[st.session_state.employees_estancos['Name'] == employee_name].iloc[0]
+    # Modify name
+    new_employee_name = st.text_input('**Name:**', value=employee_name)
+    estancos = [employee_data[f'Estanco_{i+1}'] for i in range(n_estancos)]
+    st.write('**Estancos:**')
+    new_employee_estancos = [st.checkbox(f'Estanco {i+1}', value=estancos[i])*1 for i in range(n_estancos)]
+
+    if st.button('Submit'):
+        if not any(new_employee_estancos):
+            st.error("Employee must work in at least one estanco")
+            return
+        if new_employee_name != employee_name:
+            if new_employee_name in employees:
+                st.error(f"Employee {new_employee_name} already exists")
+                return
+            # Update employee name in the list of employees
+        employees[employees.index(employee_name)] = new_employee_name
+        st.session_state.employees_estancos.loc[st.session_state.employees_estancos['Name'] == employee_name, 'Name'] = new_employee_name
+        st.session_state.employees_estancos.loc[st.session_state.employees_estancos['Name'] == employee_name, [f'Estanco_{i+1}' for i in range(n_estancos)]] = new_employee_estancos
+        st.success(f"Edited employee: {employee_name}")
+
+        save_data(folder_data, st.session_state.employees_estancos, vacation_data, timetable_data=None)
         st.rerun()
 
 with employees_tab:
@@ -78,9 +107,11 @@ with employees_tab:
     # Display employee data
     # st.dataframe(employee_data, use_container_width=True)
 
-    add_employee_btn = st.button('Add Employee')
-    if add_employee_btn:
-        show_add_employee_dialog()
+    add_employee_col, edit_employee_col, _ = st.columns([2, 2, 9])
+    if add_employee_col.button('Add Employee'):
+        add_employee()
+    if edit_employee_col.button('Edit Employee'):
+        edit_employee()
 
     st.dataframe(employees_display_df, use_container_width=True, hide_index=True)
 
