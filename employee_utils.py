@@ -1,9 +1,9 @@
-import streamlit
+from streamlit import experimental_dialog
 import pandas as pd
 from utils import save_data
 
 
-@streamlit.experimental_dialog("Add employee:")
+@experimental_dialog("Add employee:")
 def add_employee(st, vacation_data, folder_data):
     "Dialog to add a new employee to the system."
     new_employee_name = st.text_input('**Name:**')
@@ -28,7 +28,7 @@ def add_employee(st, vacation_data, folder_data):
         st.rerun()
 
 
-@streamlit.experimental_dialog("Edit employee:")
+@experimental_dialog("Edit employee:")
 def edit_employee(st, vacation_data, folder_data):
     "Dialog to edit an existing employee in the system."
     employee_name = st.selectbox('Select employee:', st.session_state.employees)
