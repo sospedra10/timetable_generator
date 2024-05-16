@@ -113,7 +113,7 @@ with employees_tab:
     if edit_employee_col.button('Edit Employee'):
         edit_employee()
 
-    st.dataframe(employees_display_df, use_container_width=True, hide_index=True)
+    st.dataframe(employees_display_df, use_container_width=True, hide_index=True, )
 
     # not at the moment (some errors)
     # employee_data = st.data_editor(employee_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")
@@ -156,7 +156,16 @@ with vacations_tab:
 
     # Plot vacation dates per employee
     st.write("#### Vacation Dates:")
-    st.bar_chart({employee: len(vacations) for employee, vacations in employee_vacations.items()})
+    # pyplot chart
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(6, 3))
+    plt.bar(employee_vacations.keys(), [len(vacations) for vacations in employee_vacations.values()])
+    plt.xlabel('Employee')
+    plt.ylabel('Number of vacations')
+    # make the plot smaller
+    # plt.gcf().set_size_inches(4, 2)
+    st.pyplot(plt)
+
     
 
 get_timetables_button = st.sidebar.button('Get Timetables')
