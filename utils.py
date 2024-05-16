@@ -81,7 +81,6 @@ def generate_timetable(days, employees, employees_estancos, employee_vacations):
                 employee_timetables[estanco_name] = {}
             
             employee_timetables[estanco_name][current_date] = generate_daily_timetable(current_date, employees, employees_estancos, employee_vacations, employee_timetables, estanco_name) 
-        # break
         current_date += timedelta(days=1)
     return employee_timetables
 
@@ -104,6 +103,8 @@ def generate_optimized_timetable(days, employees, employees_estancos, employee_v
         employee_timetables = generate_timetable(days=days, employees=permutation, employees_estancos=employees_estancos, employee_vacations=employee_vacations)
         # This is the score that we want to minimize (Count of the number of shifts that couldn't be assigned)
         score = count_shifts(employee_timetables, type='unabailable')
+        if score == 0:
+            return employee_timetables, score
         if score < best_score:
             best_score = score
             best_employee_timetables = employee_timetables
