@@ -86,10 +86,10 @@ with vacations_tab:
 
     
     add_employee_vacation_col, edit_employee_vacation_col, _ = st.columns([2, 2, 9])
-    if add_employee_col.button('Add Vacation'):
+    if add_employee_vacation_col.button('Add Vacation'):
         add_employee_vacation(st, vacation_data, folder_data)
     if edit_employee_vacation_col.button('Edit Vacation'):
-        edit_employee(st, vacation_data, folder_data)
+        edit_employee_vacation(st, vacation_data, folder_data)
 
 
     st.dataframe(vacation_data.sort_values(by='Name'), hide_index=True, use_container_width=True)  
