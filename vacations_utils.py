@@ -9,12 +9,14 @@ def add_employee_vacation(st, vacation_data, folder_data):
     new_vacation_start = st.date_input('**Vacation Start:**')
     new_vacation_end = st.date_input('**Vacation End:**')
 
-    st.write(vacation_data)
+    employee_vacations = vacation_data[vacation_data['Name'] == new_employee_name]
+    if employee_vacations.shape[0] > 0:
+        st.write(employee_vacations)
+    else:
+        st.write("**No vacations for this employee at the moment**")
 
     # TODO: Add validation to check if the vacation dates are valid
     # TODO: Add validation to check if the employee already has a vacation
-    # TODO: Show in the screen the vacations (if it has) for the selected employee so that the user can check if the new vacation dates are valid
-    # or if the user wants to edit the existing vacation or if the employee has too many vacations
 
     if st.button('Submit'):
         if new_employee_name in vacation_data['Name'].values:

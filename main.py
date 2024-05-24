@@ -99,9 +99,6 @@ with vacations_tab:
 
     employee_vacations = get_employee_vacations(st.session_state.employees, vacation_data)
 
-    for employee, vacations in employee_vacations.items():
-        st.write(f"**{employee}**: {len(vacations)}")
-
     # Plot vacation dates per employee
     st.write("#### Vacation Dates:")
     # pyplot chart
