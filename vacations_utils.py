@@ -3,7 +3,20 @@ import pandas as pd
 
 
 def are_vacation_collisions(employee_vacations, new_vacation_start, new_vacation_end):
-    "Check if the new vacation dates are colliding with other vacations."
+    """
+    Check if the new vacation dates are colliding with other vacations.
+
+    Parameters:
+    employee_vacations (pd.DataFrame): DataFrame with the employee vacations.
+    new_vacation_start (pd.Timestamp): Start date of the new vacation.
+    new_vacation_end (pd.Timestamp): End date of the new vacation.
+
+    Returns:
+    bool: True if there is a collision, False otherwise.
+    
+    
+    """
+
     for _, employee_vacation in employee_vacations.iterrows():
         print()
         print(employee_vacation)
@@ -37,15 +50,10 @@ def add_employee_vacation(st, vacation_data, folder_data):
     # if new_vacation_start > new_vacation_end:
     #     st.warning("Vacation start date must be before vacation end date")
 
-    # TODO: Add validation to check if the vacation dates are valid
-    # TODO: Add validation to check if the employee already has a vacation
-
     if st.button('Submit'):
         # Check if the new employee vacations are not collapsing with other vacations
-        # if (employee_vacations['Vacation Start'] <= new_vacation_start <= employee_vacations['Vacation End']) | (employee_vacations['Vacation End'] >= new_vacation_start)):
-        # if (employee_vacations['Vacation Start'] <= new_vacation_start <= employee_vacations['Vacation End']).any():
         if are_vacation_collisions(employee_vacations, new_vacation_start, new_vacation_end):
-            st.error(f"Employee {new_employee_name} already has a vacation")
+            st.error(f"Employee {new_employee_name} already has a vacation in that period")
             return
         if new_vacation_start > new_vacation_end:
             st.error("Vacation start date must be before vacation end date")
@@ -63,7 +71,12 @@ def add_employee_vacation(st, vacation_data, folder_data):
 @experimental_dialog("Edit employee vacation:")
 def edit_employee_vacation(st, vacation_data, folder_data):
     "Dialog to edit an existing employee vacation in the system."
-    vacation_index = st.selectbox('Select vacation:', vacation_data['Name'])
+    vacation_index = st.selectbox('Select vacation:', vacation_data[['Name', 'Vacation Start', 'Vacation End']].apply(lambda x: f"{x['Name']} : ({x['Vacation Start']} to {x['Vacation End']})", axis=1).tolist())
+    vacation_employee_name = vacation_index.split(':')[0].strip()
+    vacations_part = vacation_index.split('(')[1].split('to')
+    vacation_start = pd.Timestamp(vacations_part[0].strip())
+    vacation_end = pd.Timestamp(vacations_part[1].strip())
+    st.write(vacation_employee_name, vacation_start, vacation_end)
     vacation_data = vacation_data[vacation_data['Name'] == vacation_index].iloc[0]
     # Modify name
     new_employee_name = st.selectbox('**Name:**', st.session_state.employees, index=st.session_state.employees.index(vacation_data['Name']))
