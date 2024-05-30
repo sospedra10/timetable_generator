@@ -28,6 +28,31 @@ def are_vacation_collisions(employee_vacations, new_vacation_start, new_vacation
     return False
 
 
+def check_vacation_errors(st, employee_name, employee_vacations, new_vacation_start, new_vacation_end):
+    """
+    Check if there are any errors with the new vacation dates.
+
+    Parameters:
+        st (streamlit): Streamlit object.
+        employee_name (str): Name of the employee.
+        employee_vacations (pd.DataFrame): DataFrame with the employee vacations.
+        new_vacation_start (pd.Timestamp): Start date of the new vacation.
+        new_vacation_end (pd.Timestamp): End date of the new vacation.
+
+    Returns:
+        bool: True if there is an error, False otherwise.
+    """
+
+    # Check if the new employee vacations are not collapsing with other vacations
+    if are_vacation_collisions(employee_vacations, new_vacation_start, new_vacation_end):
+        st.error(f"Employee {employee_name} already has a vacation in that period")
+        return True
+    if new_vacation_start > new_vacation_end:
+        st.error("Vacation start date must be before vacation end date")
+        return True
+    return False
+
+
 @experimental_dialog("Add employee vacation:")
 def add_employee_vacation(st, vacation_data, folder_data):
     "Dialog to add a new employee vacation to the system."
@@ -37,55 +62,59 @@ def add_employee_vacation(st, vacation_data, folder_data):
     new_vacation_end = new_vacation_end_col.date_input('**Vacation End:**')
 
     employee_vacations = vacation_data[vacation_data['Name'] == new_employee_name]
+    # Display employee vacations if they exist for the selected employee
     if employee_vacations.shape[0] > 0:
         st.write(employee_vacations)
     else:
         st.write("**No vacations for this employee at the moment**")
 
-    # if new_vacation_start > new_vacation_end:
-    #     st.warning("Vacation start date must be before vacation end date")
-
     if st.button('Submit'):
-        # Check if the new employee vacations are not collapsing with other vacations
-        if are_vacation_collisions(employee_vacations, new_vacation_start, new_vacation_end):
-            st.error(f"Employee {new_employee_name} already has a vacation in that period")
+        
+        if check_vacation_errors(st, new_employee_name, employee_vacations, new_vacation_start, new_vacation_end):
             return
-        if new_vacation_start > new_vacation_end:
-            st.error("Vacation start date must be before vacation end date")
-            return
+
+        # Add new vacation to the vacation_data DataFrame
         new_vacation = pd.DataFrame({'Name': new_employee_name, 'Vacation Start': new_vacation_start, 'Vacation End': new_vacation_end}, index=[0])
         vacation_data = pd.concat([vacation_data, new_vacation], ignore_index=True)
         
         st.success(f"Added new vacation for {new_employee_name}")
 
-        st.write(vacation_data)
-
         save_data(folder_data, st.session_state.employees_estancos, vacation_data, timetable_data=None)
         st.rerun()
+
 
 @experimental_dialog("Edit employee vacation:")
 def edit_employee_vacation(st, vacation_data, folder_data):
     "Dialog to edit an existing employee vacation in the system."
-    vacation_index = st.selectbox('Select vacation:', vacation_data[['Name', 'Vacation Start', 'Vacation End']].apply(lambda x: f"{x['Name']} : ({x['Vacation Start']} to {x['Vacation End']})", axis=1).tolist())
-    vacation_employee_name = vacation_index.split(':')[0].strip()
-    vacations_part = vacation_index.split('(')[1].split('to')
-    vacation_start = pd.Timestamp(vacations_part[0].strip())
-    vacation_end = pd.Timestamp(vacations_part[1].strip())
-    st.write(vacation_employee_name, vacation_start, vacation_end)
-    vacation_data = vacation_data[vacation_data['Name'] == vacation_index].iloc[0]
-    # Modify name
-    new_employee_name = st.selectbox('**Name:**', st.session_state.employees, index=st.session_state.employees.index(vacation_data['Name']))
-    new_vacation_start = st.date_input('**Vacation Start:**', value=vacation_data['Vacation Start'])
-    new_vacation_end = st.date_input('**Vacation End:**', value=vacation_data['Vacation End'])
+    employee_name = st.selectbox('Select vacation employee name to edit:', vacation_data['Name'].unique()) 
+
+    employee_vacations = vacation_data[vacation_data['Name'] == employee_name]
+
+    # Display employee vacations
+    st.write(employee_vacations)
+
+    # Select vacation to edit
+    vacation_index = st.selectbox('Select vacation:', employee_vacations.index, format_func=lambda x: f"{employee_vacations.loc[x, 'Vacation Start']} to {employee_vacations.loc[x, 'Vacation End']}")
+
+    selected_vacation = employee_vacations.loc[vacation_index]
+
+    new_vacation_start_col, new_vacation_end_col = st.columns(2)
+    new_vacation_start = new_vacation_start_col.date_input("**Vacation Start:**", selected_vacation['Vacation Start'])
+    new_vacation_end = new_vacation_end_col.date_input("**Vacation End:**", selected_vacation['Vacation End'])
+
+    st.write(selected_vacation)
+    st.write(new_vacation_start)
+    st.write(new_vacation_end)
+  
 
     if st.button('Submit'):
-        if new_vacation_start >= new_vacation_end:
-            st.error("Vacation start date must be before vacation end date")
+        if check_vacation_errors(st, employee_name, employee_vacations, new_vacation_start, new_vacation_end):
             return
-        vacation_data['Name'] = new_employee_name
-        vacation_data['Vacation Start'] = new_vacation_start
-        vacation_data['Vacation End'] = new_vacation_end
-        st.success(f"Edited vacation for {new_employee_name}")
+        
+        vacation_data.loc[vacation_index, 'Vacation Start'] = start_date
+            vacation_data.loc[vacation_index, 'Vacation End'] = end_date
+            st.experimental_memo.clear()
+            st.write("Vacation updated successfully!")
 
         st.write(vacation_data)
 
