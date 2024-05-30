@@ -3,7 +3,7 @@ import streamlit as st
 import time
 
 from utils import generate_timetable, create_timetable_dataframe, get_employee_vacations, save_data
-from employee_utils import add_employee, edit_employee
+from employee_utils import add_employee, edit_employee, delete_employee
 from vacations_utils import add_employee_vacation, edit_employee_vacation
 
 
@@ -57,11 +57,14 @@ with employees_tab:
     # Display employee data
     # st.dataframe(employee_data, use_container_width=True)
 
-    add_employee_col, edit_employee_col, _ = st.columns([2, 2, 9])
+    add_employee_col, edit_employee_col, delete_employee_col, _ = st.columns([2, 2, 2, 9])
     if add_employee_col.button('Add Employee'):
         add_employee(st, vacation_data, folder_data)
     if edit_employee_col.button('Edit Employee'):
         edit_employee(st, vacation_data, folder_data)
+    if delete_employee_col.button('Delete Employee'):
+        delete_employee(st, vacation_data, folder_data)
+
 
     st.dataframe(employees_display_df, use_container_width=True, hide_index=True, )
 

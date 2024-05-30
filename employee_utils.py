@@ -62,3 +62,18 @@ def edit_employee(st, vacation_data, folder_data):
 
         save_data(folder_data, st.session_state.employees_estancos, vacation_data, timetable_data=None)
         st.rerun()
+
+@experimental_dialog("Delete employee:")
+def delete_employee(st, vacation_data, folder_data):
+    "Dialog to delete an existing employee in the system."
+    employee_name = st.selectbox('Select employee:', st.session_state.employees)
+    st.warning(f"Are you sure you want to delete **{employee_name}?** \n All vacations and timetables for this employee will be deleted.")
+
+    if st.button('Delete'):
+        st.session_state.employees.remove(employee_name)
+        st.session_state.employees_estancos = st.session_state.employees_estancos[st.session_state.employees_estancos['Name'] != employee_name]
+        vacation_data = vacation_data[vacation_data['Name'] != employee_name]
+        st.success(f"Deleted employee: {employee_name}")
+
+        save_data(folder_data, st.session_state.employees_estancos, vacation_data, timetable_data=None)
+        st.rerun()
