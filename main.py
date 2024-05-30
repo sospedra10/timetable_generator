@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 import time
+import numpy as np
 
 from utils import generate_timetable, create_timetable_dataframe, get_employee_vacations, save_data
 from employee_utils import add_employee, edit_employee, delete_employee
@@ -73,7 +74,22 @@ with employees_tab:
 employee_vacations = get_employee_vacations(st.session_state.employees, vacation_data)
 
 # Vacation number of days from employee_vacations dictionary
-vacation_data['Days'] = [(vacation_data.iloc[i]['Vacation End'] - vacation_data.iloc[i]['Vacation Start']).days+1 for i in range(len(vacation_data))]
+# vacation_data['Days'] = [(vacation_data.iloc[i]['Vacation End'] - vacation_data.iloc[i]['Vacation Start']).days+1 for i in range(len(vacation_data))]
+
+def calculate_weekdays(start_date, end_date):
+    """Calculate the number of weekdays between two dates."""
+    # Convert to numpy datetime64
+    start = np.datetime64(start_date)
+    end = np.datetime64(end_date)
+    # Calculate number of weekdays
+    weekdays = np.busday_count(start, end + np.timedelta64(1, 'D'))
+    return weekdays
+
+# Apply the function to calculate vacation days excluding weekends
+vacation_data['Days'] = vacation_data.apply(
+    lambda row: calculate_weekdays(row['Vacation Start'], row['Vacation End']),
+    axis=1
+)
 
 
 
