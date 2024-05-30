@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import itertools
 import pandas as pd
+import numpy as np
 
 
 
@@ -171,3 +172,13 @@ def save_data(folder_data, employee_data, vacation_data, timetable_data):
         vacation_data.to_excel(writer, sheet_name='Vacation', index=False)
         if timetable_data is not None:
             timetable_data.to_excel(writer, sheet_name='Timetable', index=True)
+
+
+def calculate_weekdays(start_date, end_date):
+    """Calculate the number of weekdays between two dates."""
+    # Convert to numpy datetime64
+    start = np.datetime64(start_date)
+    end = np.datetime64(end_date)
+    # Calculate number of weekdays
+    weekdays = np.busday_count(start, end + np.timedelta64(1, 'D'))
+    return weekdays

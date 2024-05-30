@@ -58,8 +58,8 @@ def add_employee_vacation(st, vacation_data, folder_data):
     "Dialog to add a new employee vacation to the system."
     new_employee_name = st.selectbox('**Name:**', st.session_state.employees)
     new_vacation_start_col, new_vacation_end_col = st.columns(2)
-    new_vacation_start = new_vacation_start_col.date_input('**Vacation Start:**')
-    new_vacation_end = new_vacation_end_col.date_input('**Vacation End:**')
+    new_vacation_start = new_vacation_start_col.date_input('**Vacation Start:**',  format="DD/MM/YYYY")
+    new_vacation_end = new_vacation_end_col.date_input('**Vacation End:**',  format="DD/MM/YYYY")
 
     employee_vacations = vacation_data[vacation_data['Name'] == new_employee_name]
     # Display employee vacations if they exist for the selected employee
@@ -99,8 +99,8 @@ def edit_employee_vacation(st, vacation_data, folder_data):
     selected_vacation = employee_vacations.loc[vacation_index]
 
     new_vacation_start_col, new_vacation_end_col = st.columns(2)
-    new_vacation_start = new_vacation_start_col.date_input("**Vacation Start:**", selected_vacation['Vacation Start'])
-    new_vacation_end = new_vacation_end_col.date_input("**Vacation End:**", selected_vacation['Vacation End'])
+    new_vacation_start = new_vacation_start_col.date_input("**Vacation Start:**", selected_vacation['Vacation Start'], format="DD/MM/YYYY")
+    new_vacation_end = new_vacation_end_col.date_input("**Vacation End:**", selected_vacation['Vacation End'],  format="DD/MM/YYYY")
   
 
     if st.button('Submit'):

@@ -1,15 +1,19 @@
 import pandas as pd
 import streamlit as st
 import time
-import numpy as np
 
-from utils import generate_timetable, create_timetable_dataframe, get_employee_vacations, save_data
+
+from utils import generate_timetable, create_timetable_dataframe, get_employee_vacations, save_data, calculate_weekdays
 from employee_utils import add_employee, edit_employee, delete_employee
 from vacations_utils import add_employee_vacation, edit_employee_vacation, delete_employee_vacation
 
 
+
+
+
 st.set_page_config(layout="wide")
 st.title('Employee Timetable Generator')
+
 
 # Settings for generating timetable
 st.sidebar.markdown('### Settings:')
@@ -22,7 +26,7 @@ employee_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='E
 vacation_data = pd.read_excel(f'{folder_data}/employee_data.xlsx', sheet_name='Vacation')
 print(employee_data)
 # vacation start and end without the time
-vacation_data['Vacation Start'] = pd.to_datetime(vacation_data['Vacation Start']).dt.date
+vacation_data['Vacation Start'] = pd.to_datetime(vacation_data['Vacation Start'], format='%d-%m-%Y').dt.date
 vacation_data['Vacation End'] = pd.to_datetime(vacation_data['Vacation End']).dt.date
 
 # Assuming the data structure:
@@ -72,18 +76,6 @@ with employees_tab:
 
 # Get vacation dates for each employee
 employee_vacations = get_employee_vacations(st.session_state.employees, vacation_data)
-
-# Vacation number of days from employee_vacations dictionary
-# vacation_data['Days'] = [(vacation_data.iloc[i]['Vacation End'] - vacation_data.iloc[i]['Vacation Start']).days+1 for i in range(len(vacation_data))]
-
-def calculate_weekdays(start_date, end_date):
-    """Calculate the number of weekdays between two dates."""
-    # Convert to numpy datetime64
-    start = np.datetime64(start_date)
-    end = np.datetime64(end_date)
-    # Calculate number of weekdays
-    weekdays = np.busday_count(start, end + np.timedelta64(1, 'D'))
-    return weekdays
 
 # Apply the function to calculate vacation days excluding weekends
 vacation_data['Days'] = vacation_data.apply(
