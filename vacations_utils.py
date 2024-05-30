@@ -77,7 +77,7 @@ def add_employee_vacation(st, vacation_data, folder_data):
         new_vacation = pd.DataFrame({'Name': new_employee_name, 'Vacation Start': new_vacation_start, 'Vacation End': new_vacation_end}, index=[0])
         vacation_data = pd.concat([vacation_data, new_vacation], ignore_index=True)
         
-        st.success(f"Added new vacation for {new_employee_name}")
+        st.success(f"Added new vacation for {new_employee_name} successfully!")
 
         save_data(folder_data, st.session_state.employees_estancos, vacation_data, timetable_data=None)
         st.rerun()
@@ -101,22 +101,17 @@ def edit_employee_vacation(st, vacation_data, folder_data):
     new_vacation_start_col, new_vacation_end_col = st.columns(2)
     new_vacation_start = new_vacation_start_col.date_input("**Vacation Start:**", selected_vacation['Vacation Start'])
     new_vacation_end = new_vacation_end_col.date_input("**Vacation End:**", selected_vacation['Vacation End'])
-
-    st.write(selected_vacation)
-    st.write(new_vacation_start)
-    st.write(new_vacation_end)
   
 
     if st.button('Submit'):
-        if check_vacation_errors(st, employee_name, employee_vacations, new_vacation_start, new_vacation_end):
+        # Check errors with the new vacation dates only if they are different from the current ones (employee_vacations would not include the selected vacation in this case)
+        if check_vacation_errors(st, employee_name, employee_vacations.drop(vacation_index), new_vacation_start, new_vacation_end):
             return
         
-        vacation_data.loc[vacation_index, 'Vacation Start'] = start_date
-            vacation_data.loc[vacation_index, 'Vacation End'] = end_date
-            st.experimental_memo.clear()
-            st.write("Vacation updated successfully!")
+        vacation_data.loc[vacation_index, 'Vacation Start'] = new_vacation_start
+        vacation_data.loc[vacation_index, 'Vacation End'] = new_vacation_end
+        
+        st.success("Vacation updated successfully!")
 
-        st.write(vacation_data)
-
-        # save_data(folder_data, st.session_state.employees_estancos, vacation_data, timetable_data=None)
-        # st.rerun()
+        save_data(folder_data, st.session_state.employees_estancos, vacation_data, timetable_data=None)
+        st.rerun()
