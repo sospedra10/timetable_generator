@@ -4,7 +4,7 @@ import time
 
 from utils import generate_timetable, create_timetable_dataframe, get_employee_vacations, save_data
 from employee_utils import add_employee, edit_employee, delete_employee
-from vacations_utils import add_employee_vacation, edit_employee_vacation
+from vacations_utils import add_employee_vacation, edit_employee_vacation, delete_employee_vacation
 
 
 st.set_page_config(layout="wide")
@@ -57,7 +57,7 @@ with employees_tab:
     # Display employee data
     # st.dataframe(employee_data, use_container_width=True)
 
-    add_employee_col, edit_employee_col, delete_employee_col, _ = st.columns([2, 2, 2, 9])
+    add_employee_col, edit_employee_col, delete_employee_col, _ = st.columns([2, 2, 2, 6])
     if add_employee_col.button('Add Employee'):
         add_employee(st, vacation_data, folder_data)
     if edit_employee_col.button('Edit Employee'):
@@ -67,13 +67,6 @@ with employees_tab:
 
 
     st.dataframe(employees_display_df, use_container_width=True, hide_index=True, )
-
-    # not at the moment (some errors)
-    # employee_data = st.data_editor(employee_data.sort_values(by='Name'), hide_index=True, num_rows="dynamic")
-    # # Save all data to Excel
-    # save_data(folder_data, employee_data, vacation_data, timetable_data=None)
-
-
 
 
 # Get vacation dates for each employee
@@ -88,11 +81,13 @@ with vacations_tab:
     st.write("#### Employee Vacations:")
 
     
-    add_employee_vacation_col, edit_employee_vacation_col, _ = st.columns([2, 2, 9])
+    add_employee_vacation_col, edit_employee_vacation_col, delete_employee_vacation_col, _ = st.columns([2, 2, 2, 6])
     if add_employee_vacation_col.button('Add Vacation'):
         add_employee_vacation(st, vacation_data, folder_data)
     if edit_employee_vacation_col.button('Edit Vacation'):
         edit_employee_vacation(st, vacation_data, folder_data)
+    if delete_employee_vacation_col.button('Delete Vacation'):
+        delete_employee_vacation(st, vacation_data, folder_data)
 
 
     st.dataframe(vacation_data.sort_values(by='Name'), hide_index=True, use_container_width=True)  

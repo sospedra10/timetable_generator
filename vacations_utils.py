@@ -115,3 +115,24 @@ def edit_employee_vacation(st, vacation_data, folder_data):
 
         save_data(folder_data, st.session_state.employees_estancos, vacation_data, timetable_data=None)
         st.rerun()
+
+
+@experimental_dialog("Delete employee vacation:")
+def delete_employee_vacation(st, vacation_data, folder_data):
+    "Dialog to delete an existing employee vacation in the system."
+    employee_name = st.selectbox('Select vacation employee name to delete:', vacation_data['Name'].unique()) 
+
+    employee_vacations = vacation_data[vacation_data['Name'] == employee_name]
+
+    # Display employee vacations
+    st.write(employee_vacations)
+
+    # Select vacation to delete
+    vacation_index = st.selectbox('Select vacation:', employee_vacations.index, format_func=lambda x: f"{employee_vacations.loc[x, 'Vacation Start']} to {employee_vacations.loc[x, 'Vacation End']}")
+
+    if st.button('Delete'):
+        vacation_data.drop(vacation_index, inplace=True)
+        st.success("Vacation deleted successfully!")
+
+        save_data(folder_data, st.session_state.employees_estancos, vacation_data, timetable_data=None)
+        st.rerun()
